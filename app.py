@@ -70,6 +70,14 @@ if run_button:
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
+    names = model.names
+
+    CLASS_COLORS = {
+        0: (0, 255, 0),
+        1: (0, 0, 255),
+        2: (255, 0, 0)
+    }
+
     # ---- Output video ----
     output_path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4").name
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
@@ -90,7 +98,55 @@ if run_button:
         results = model.predict(frame, conf=confidence, iou=IoU, verbose=False)
 
         # Plot results
-        annotated_frame = results[0].plot()
+        annotated_frame = frame.copy()
+
+        if results[0].boxes is not None:
+            boxes = results[0].boxes
+
+            for box in boxes:
+                x1, y1, x2, y2 = map(int, box.xyxy[0])
+                cls_id = int(box.cls[0])
+                conf = float(box.conf[0])
+
+                label = f"{names[cls_id]} {conf:.2f}"
+                color = CLASS_COLORS.get(cls_id, (255, 255, 255))
+
+                # Bounding box
+                cv2.rectangle(
+                    annotated_frame,
+                    (x1, y1),
+                    (x2, y2),
+                    color,
+                    thickness=2
+                )
+
+                # Label background
+                (w, h), _ = cv2.getTextSize(
+                    label,
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.6,
+                    2
+                )
+
+                cv2.rectangle(
+                    annotated_frame,
+                    (x1, y1 - h - 8),
+                    (x1 + w + 4, y1),
+                    color,
+                    -1
+                )
+
+                # Label text
+                cv2.putText(
+                    annotated_frame,
+                    label,
+                    (x1 + 2, y1 - 4),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.6,
+                    (255, 255, 255),
+                    2,
+                    cv2.LINE_AA
+                )
 
         out.write(annotated_frame)
 
