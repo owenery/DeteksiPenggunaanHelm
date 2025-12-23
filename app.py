@@ -1,7 +1,6 @@
 import streamlit as st
 import tempfile
 import cv2
-import os
 from ultralytics import YOLO
 
 st.set_page_config(page_title="YOLO Video Detection", layout="wide")
