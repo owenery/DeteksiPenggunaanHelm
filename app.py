@@ -157,14 +157,9 @@ if run_button:
 
     st.success("🎉 Detection finished!")
 
-    # =========================
-    # Show results
-    # =========================
-    st.video(output_path)
-
     st.download_button(
         label="⬇️ Download Result Video",
         data=open(output_path, "rb"),
-        file_name="result_detection.mp4",
+        file_name="hasil.mp4",
         mime="video/mp4"
     )
